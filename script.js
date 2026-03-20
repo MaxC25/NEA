@@ -1,33 +1,51 @@
-
+//this will not work with browsers not supporting ES6 because I like local variables.
 //document parts
 const expressionInput = document.getElementById("in");
-const evalBtn = document.getElementById("evalBtn")
-
+//const evalBtn = document.getElementById("evalBtn")
+//var bitwise=false
 const prenots="!~¬"//for all that are not in square brackets, please do .split("")
-//const postnots="'" commented out for being pointless but being good for documentation
+//const postnot="'" commented out for being pointless but being good for documentation
 const ands="&*·ϗ⁊∧∩"
 const nands="|¦↑⊽"
 const xors=["XOR","^","⊕"]
-const ors=["||,¦¦,+,V"]
+const ors=["||","¦¦","+","V","∪"]
 const nors=["↓","⊼","↑↑"]
-const implicators=["->, →, ⇒, ⊃"]
-
-//const tokeniser=(expr)=>{expr.search()}
-/*const bIMPLY=(p,q)=>{~p|q}//in javascript, | is annoyingly or and not nand, as it should be.
-const bNIMPLY=(p,q)=>{p&~q}
-const bNAND=(p,q)=>{~(p&q)}
-const bNOR=(p,q)=>{~(p|q)}
-const lIMPLY=(p,q)=>{!p||q}
-const lNIMPLY=(p,q)=>{!p||q}
-const lNAND=(p,q)=>{!(p&&q)}
-const lNOR=(p,q)=>{!(p||q)}*/
-
+const imps=["->","→","⇒","⊃"]//implication, its reverse
+const pmis=["<-","←","⇐","⊂"]
+/*
+const nonprefix_operands=()=>{return ("'+10V↓⊼∪"+ands+nands).split("").concat(xors).concat(imps).concat(pmis).concat("==")}//evil trick to reduce redundancy in memory and code
 const tokenise=(expr)=>{
-    let operands=("'+10↓⊼"+prenots+ands+nands).split("").concat(xors).concat(implicators).join("|");//reduces redundancy
-    return expr.split(RegExp("(\s|?=["+operands+"])|(?<=["+operands+"])")).reverse
+    let q="\\"+(nonprefix_operands().concat(prenots.split()).join("|\\"))
+    return expr.split(RegExp("(?=\s["+q+"])|(?<=\s["+q+"])/u")).reverse()
+}*/
+const tokenise=(expr)=>{
+    let operands=("'+10↓⊼"+prenots+ands).split("").concat(xors).concat(imps).concat(pmis).join("|");//reduces redundancy
+    return expr.split(RegExp("("+operands+")"))
 }
-
-const shunt(tokens)
+/*
+normalise=(op)=>{
+    if op in ands
+}
+//function bitarrayaccess(arr,bit){return Boolean(arr[bit>>3+1]>>(bit%8)&true)}//please use Uint8Array for arr and bigint for bit
+function bitarraypush(x,arr,len){
+    arr[()=>{if(len){return len-1>>5}else{return false}}]|=(x>>(length%32))
+}
+//function bitarraypop(x,arr,bit)
+function shunt(orders){
+    let [operators,values,bits]=[Uint16Array,Uint16Array,Uint32Array]//operators is the unicodes of the chosen characters
+    //values is a bit array and bits is its length.
+    while(orders.length()){
+        let [order,type]=[orders.pop(),Uint8ClampedArray];//type is a single value array where 0:literal 1:prefix 2:infix 3:suffix 4:bracket
+        switch(true){
+            case(order.match("/\s")):break;
+            case(prenots.includes(order)):operators.push(0x21);break;
+            case(Set(["|","¦","↑"]).has(order)):if(order==orders[length(orders)-1]){order+=orders.pop()}else{break}
+            case(Set(["1","0"].has(order))):bitarraypush(Boolean(order));break
+            case((type[0]==2)||infix_operands().includes(order)):
+                {}
+        }
+    }
+}
 /*
 const tokenise=(expr)=>{
     let tokens=[];
@@ -41,6 +59,8 @@ const tokenise=(expr)=>{
 }
 */
 
-evalBtn.addEventListener("click", () => {
-    console.log(tokenise(expressionInput.value))
+document.getElementById("evalBtn").addEventListener("click", () => {
+    //bitwise=false
+    console.log(tokenise(document.getElementById("in").value))
+    //console.log(shunt(tokenise(document.getElementById("in"))))
 })
