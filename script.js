@@ -18,9 +18,10 @@ const tokenise=(expr)=>{
     let q="\\"+(nonprefix_operands().concat(prenots.split()).join("|\\"))
     return expr.split(RegExp("(?=\s["+q+"])|(?<=\s["+q+"])/u")).reverse()
 }*/
+
 const tokenise=(expr)=>{
-    let operands=("'+10↓⊼"+prenots+ands).split("").concat(xors).concat(imps).concat(pmis).join("|");//reduces redundancy
-    return expr.split(RegExp("("+operands+")"))
+    let operands=("'+10↓⊼"+prenots+ands).split("").concat(xors).concat(imps).concat(pmis).map((a)=>a.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&'));//the map escapes
+    return expr.split(RegExp("("+operands.join("|")+")/u"))
 }
 /*
 normalise=(op)=>{
