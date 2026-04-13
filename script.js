@@ -39,65 +39,35 @@ function prec(op){switch(op){//should probably change it to something more flexi
     case"→":case"←":return 6
     case"≡":return 0xFE
 }}
-function shunt(orders){//first is last and last is first
-    let [operators,out,i/*testing*/,type]=[[],[],BigInt(0),Uint8Array]//type is a single value array where 0:null 1:prefix 2:infix 3:suffix 4:bracket 5:literal_or_reference
-	let b=orders.length*2
-    while(orders.length){
-	console.log(i);
-        type[0]=false
-        let order=orders.pop();
-		console.log(order)
-		console.log(orders)//So from here-on, orders.last() is the next order
-        if(orders.last()===""){orders.pop()}//pre-emptive to reduce pain
-        if(order===""||/\s/.test(order)){}
-        else if(prenots.includes(order)){operators.push(0x21)}
-        else{//mostly operand handling stuff and normalisation
-        let type=Uint8Array
-        let nnorm=(T,F)=>orders.last()==="'"?(orders.pop(),F):T//a helper function where T is the normal order and F is its complement
-	    let norm=(T,F)=>[type[0],order]=[2,nnorm(T,F)]//most boring repeat
-        if(["|","¦","↑"].includes(order)){
-			orders.last()===order?(()=>order+=orders.pop(),order=(ors.slice(1,3).includes(order)?nnorm("V","↓"):nnorm("↓","V"))):order=nnorm(order,"|","&");
-			type[0]=2
-		}
-        var chkorder=(A)=>A.slice(1).includes(order);//A is not neccecarilly the order but rather is the operator we are checking if the order is.
-        var chkorderstr=(A)=>A.substr(1).includes(order);
-	    type[0]=2?void 0://if it is, it's already normalised and not ( or ¬
-        order==="("?operators.push("(")://this line and the next one are not normalisation.
-        prenots.includes(order)?operators.push("¬"):
-        order==="'"?out.push(order):
-        orders.last()!=="'"&&new Set(["&","|","⊕","V","↓","→","←","=="]).has(order)&&orders?()=>type[0]=2://ensures atomic rewrites, not neccecarry but good practice
-        chkorderstr(ands)?norm("&","|"):
-        chkorderstr(nands)?norm("|","&"):
-        chkorder(xors)?norm("⊕","⊕'"):
-        ["+","∪"].includes(order)?norm("V","↓"):
-        chkorder(nors)?norm("↓","V"):
-        chkorder(imps)?norm("→","→'"):
-        chkorder(pmis)?norm("←","←'"):
-        chkorder(equals)?norm("==","=/="):
-	    ["1","0"].includes(order)?()=>out.push(Boolean(Number(order))):()=>console.log(order+"var"),type[0]=5,out.push(order)//normailsation done.
-		console.log(i+" orders: "+orders);
-		console.log(" out :"+out);
-		console.log(order);
-		console.log(type[0])
-        if(type[0]==2){//if an infix operator
-			console.log(order+"is an operator")
-			operators.push(order)
-			console.log(i.toString()+order+" is an operator")
-			while((operators.last()!==")")&&((prec(operators.last())>prec(order))||((prec(order)==prec(operators.last()))&&set(["→","→'"]).has(operators)))){out.push(operators.pop())}
-			operators.push(order);
-        }
-        else if(order===")"){while(operators.last()!="("){
-            out.push(operators.pop())}
-            operators.pop();
-            if(operators.last()==="¬"){out.push(operators.pop())}
-        }
-	    console.log(i+" operators: "+operators)
-	    console.log(i+" out :"+out)
-        console.log("output:"+out)
-        i++}
-    }
-	while(operators.length){out.push(operators.pop())}//because then I delete the other object.
-    return out	
+function shunt(orders){
+let [out,ops,t]=[[],[],Uint8Array];
+while(orders.length){
+let order=orders.pop();
+if(order===""){order=orders.pop()}
+if(orders.last()===""){orders.pop()}
+t[0]=false
+let nnorm=(T,F)=>orders.last()==="'"?(orders.pop(),F):T;
+if(["|","¦","↑"].includes(order)){orders.last()===order?(()=>order+=orders.pop(),order=(ors.slice(1,3).includes(order)?nnorm("V","↓"):nnorm("↓","V"))):order=nnorm(order,"|","&");t[0]=2}
+else{//normalises
+["1","0"].includes(order)?out.push(Boolean(order)):
+["(","'"].includes(order)?operators.push(order):
+")"===order?operators.push(order):
+prenots.includes(order)?operators.push("~"):
+ands.includes(order)?[t[0],order]=[2,"&"]:
+nands.includes(order)?[t[0],order]=[2,"|"]:
+xors.includes(order)?[t[0],order]=[2,"⊕"]:
+ors.includes(order)?[t[0],order]=[2,"V"]:
+nors.includes(order)?[t[0],order]=[2,"↓"]:
+imps.includes(order)?[t[0],order]=[2,"→"]:
+pmis.includes(order)?[t[0],order]=[2,"←"]:
+equals.includes(order)?[t[0],order]=[2,"="]:out.push(order)
+}
+if(t[0]==2){while(ops.length&&ops.last()!="("&&((prec(ops.last())>prec(order))||((prec(order)===prec(ops.last))&&(order==="→")))){out.push(ops.last())}ops.push(order)}
+else if(order===")"){while(ops.last!="("){out.push(ops.pop())}}
+}
+while(ops.length&&ops.last!="("){out.push(ops.pop())}
+if(ops.last==="("){console.error("mismatched brackets")}
+return out
 }
 
 document.getElementById("evalBtn").addEventListener("click", () => {
