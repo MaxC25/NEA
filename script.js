@@ -39,30 +39,31 @@ function prec(op){switch(op){//should probably change it to something more flexi
     case"→":case"←":return 6
     case"≡":return 0xFE
 }}
-function shunt(orders){
-let [out,ops,t]=[[],[],Uint8Array];
+function shunt(orders){//the shunting yard
+let [out,ops,t]=[[],[],Uint8Array];//t is a single byte representing type where 0:undeclared 1:prefix 2:infix 3:suffix 4:bracket 5:literal_or_reference
 while(orders.length){
 let order=orders.pop();
 if(order===""){order=orders.pop()}
 if(orders.last()===""){orders.pop()}
 t[0]=false
-let nnorm=(T,F)=>orders.last()==="'"?(orders.pop(),F):T;
-if(["|","¦","↑"].includes(order)){orders.last()===order?(()=>order+=orders.pop(),order=(ors.slice(1,3).includes(order)?nnorm("V","↓"):nnorm("↓","V"))):order=nnorm(order,"|","&");t[0]=2}
+let TF=(T,F)=>F?(orders.last()==="'"?(orders.pop(),F):T):orders.last()==="'"?(T+orders.pop):T;//normalises and deals with negated operators
+if(["|","¦","↑"].includes(order)){orders.last()===order?(()=>order+=orders.pop(),order=(ors.slice(1,3).includes(order)?TF("V","↓"):TF("↓","V"))):order=TF(order,"|","&");t[0]=2}//deals with weird non-prefix nature of ¦¦, also this is the only bit of old code left as it was the only bit known to work.
 else{//normalises
 ["1","0"].includes(order)?out.push(Boolean(order)):
-["(","'"].includes(order)?operators.push(order):
-")"===order?operators.push(order):
-prenots.includes(order)?operators.push("~"):
-ands.includes(order)?[t[0],order]=[2,"&"]:
-nands.includes(order)?[t[0],order]=[2,"|"]:
-xors.includes(order)?[t[0],order]=[2,"⊕"]:
-ors.includes(order)?[t[0],order]=[2,"V"]:
-nors.includes(order)?[t[0],order]=[2,"↓"]:
-imps.includes(order)?[t[0],order]=[2,"→"]:
-pmis.includes(order)?[t[0],order]=[2,"←"]:
-equals.includes(order)?[t[0],order]=[2,"="]:out.push(order)
+order==="("?ops.push(order):
+order==="'"?out.push("'"):
+prenots.includes(order)?ops.push("~"):
+ands.includes(order)?[t[0],order]=[2,TF("&",'|')]:
+nands.includes(order)?[t[0],order]=[2,TF("|","&")]:
+xors.includes(order)?[t[0],order]=[2,TF("⊕")]:
+ors.includes(order)?[t[0],order]=[2,TF("V","↓")]:
+nors.includes(order)?[t[0],order]=[2,TF("↓","V")]:
+imps.includes(order)?[t[0],order]=[2,TF("→",)]:
+pmis.includes(order)?[t[0],order]=[2,TF("←",)]:
+equals.includes(order)?[t[0],order]=[2,TF("≡",)]://end of normalisation.
+order==="="?t[0]=2:out.push(order)
 }
-if(t[0]==2){while(ops.length&&ops.last()!="("&&((prec(ops.last())>prec(order))||((prec(order)===prec(ops.last))&&(order==="→")))){out.push(ops.last())}ops.push(order)}
+if(t[0]==2){while(ops.length&&ops.last()!="("&&((prec(ops.last())>prec(order))||((prec(order)===prec(ops.last))&&(["→".has(order)])))){out.push(ops.last())}ops.push(order)}
 else if(order===")"){while(ops.last!="("){out.push(ops.pop())}}
 }
 while(ops.length&&ops.last!="("){out.push(ops.pop())}
