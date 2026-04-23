@@ -1,3 +1,4 @@
+//import "node_modules/@bitarray/es6/dist/esm/src/bitarray.js"//replace with your installation site of 
 // Encoding: UTF-8
 //this will not work with browsers not supporting ES6 because I like local variables.
 //document parts
@@ -43,7 +44,7 @@ function prec(op){switch(op){//should probably change it to something more flexi
     case"=":return 0xFF&0xFF//yes, that looks silly but I need it to be a uint8.
 }}
 
-function shunt(orders){//the shunting yard
+function shunt(orders){//the shunting yard, correct means that it's pipelined with the corrector.
 let [out,ops,t,normals]=[[],[],Uint8Array,new Set("&=|⊕V↓→←≡".split(""))];//t is a single byte representing type where 0:undeclared 1:prefix 2:infix 3:suffix 4:bracket 5:literal_or_reference
 while(orders.length){
 let order=orders.pop();
@@ -72,16 +73,15 @@ equals.includes(order)?[t[0],order]=[2,TF("≡")]://end of normalisation.
 order===")"?void 0:out.push(order)//"(" is to deal with later
 }
 if(t[0]==2&0xFF){
-  while(ops.length&&ops.last()!=="("&&((prec(ops.last())<prec(order))/*because lower number from prec, higher precedence so < is > and > is <*/||((prec(order)===prec(ops.last()))&&(order==="→")))){
+  while(ops.length&&ops.last()!=="("&&((prec(ops.last())<prec(order))||((prec(order)===prec(ops.last()))&&(order==="→")))){//prec(ops.last())<prec(order) because lower number from prec, higher precedence so < is > and > is <
     out.push(ops.pop())}
     ops.push(order)}
 else if(order===")"){while(ops.last()!=="("){out.push(ops.pop())}ops.pop()}
 }
-while(ops.length&&ops.last!="("){out.push(ops.pop())}
-if(ops.last==="("){console.error("mismatched brackets")}
+while(ops.length&&ops.last()!="("){out.push(ops.pop())}
+if(ops.last()==="("){console.error("mismatched brackets")}
 return out
 }
-
 function RPNpedant(a){
 switch(a){
   case "N": return "'";
@@ -89,15 +89,21 @@ switch(a){
   case "↓":return "X";
   case "|":return "D";
   case "&":return "K";
-  case "->":return "C";
+  case "->":case "→":return "C";
   case "=='":case "⊕":return "J";
   case "E":case "==":case "⊕'":return "Q";
   default:return a
 }
 }
+/*
+const correctRPN=new set("'AXDJCJQ".split(""))
+function compile(RPN,variables){
+while RPN.length()
+}*/
 //function RPNlike(a){if(a==="~"){return "'"}}//not true
 document.getElementById("evalBtn").addEventListener("click", () => {
     //bitwise=false
     //console.log(tokenise(document.getElementById("in").value))
-    console.log(shunt(tokenise(document.getElementById("in").value)))
+    console.log(shunt(tokenise(document.getElementById("in").value),true).join(" "))
+    console.log(["N","V","↓","|","&","->","→","=='","E","==","⊕'","'","X","D","K","C","J","Q"].map((x)=>RPNpedant(x)))
 })
