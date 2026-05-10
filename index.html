@@ -1,10 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><title>Document</title>
+<style>body,button{font-family:ibm3270,"Fira code APL",apl386,apl385,apl2741,apl2,Iosevka,"Jetbrains mono","Everson mono",courier,monospace}</style>
 </head>
 <body>
-<input type="text" id="in">
-<button id ="evalBtn">evaluate</button>
-<script type="text/javascript" src="script.js"></script>
+<input type="text" id="in"><br>
+<button id ="evalBtn">Evaluate</button>
+<button id ="RPN">Make RPN</button>
+<button id ="truth">Produce Truth Table</button><br>
+<input type="checkbox" id="Bwise">bitwise mode<br>
+<div id="out"></div>
+<script type="module" src="script.js"></script>
 </body>
 </html>
